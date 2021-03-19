@@ -1,4 +1,4 @@
-package Logica;
+package Logica.Verified;
 
 public class Encrypt {
 

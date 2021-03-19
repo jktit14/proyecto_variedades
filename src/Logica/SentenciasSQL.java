@@ -1,5 +1,9 @@
 package Logica;
 
+import Logica.Verified.Usuarios;
+import Logica.Verified.Encrypt;
+import Logica.Verified.Productos;
+import Logica.Verified.Conexion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
-public class SentenciasSQL extends Conexion {
+public class SentenciasSQL {
 
     Conexion connect = new Conexion();
     Connection connection = null;
@@ -17,7 +21,7 @@ public class SentenciasSQL extends Conexion {
     String sql = null;
 
     public boolean registro(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "Insert into empleado(CodEmpleado, NomEmpleado, ApeEmpleado, TelEmpleado, Usuario, Contraseña) "
                 + "values (?,?,?,?,?,?)";
         try {
@@ -37,7 +41,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean actualizacion(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "UPDATE empleado SET NomEmpleado=?, ApeEmpleado=?,TelEmpleado = ?, "
                 + "Usuario = ?  where CodEmpleado = ?";
         try {
@@ -56,7 +60,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean login(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "select CodEmpleado, NomEmpleado, ApeEmpleado, Usuario, Contraseña from empleado "
                 + "where Usuario=?";
         try {
@@ -85,7 +89,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean changePasswd(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "UPDATE empleado SET Contraseña = ?"
                 + " where Usuario = ?";
         try {
@@ -103,7 +107,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean restablecerPassword(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         String passwd = Encrypt.sha1(String.valueOf(user.getCodEmpleado()));
         try {
             sql = "UPDATE empleado SET Contraseña = ?"
@@ -132,7 +136,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean ConsultarUsuarios(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "select CodEmpleado, NomEmpleado, ApeEmpleado,TelEmpleado, Usuario, Contraseña from empleado "
                 + "where CodEmpleado=?";
         try {
@@ -160,7 +164,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean UsuarioExiste(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "select * from empleado "
                 + "where Usuario=?";
         try {
@@ -179,13 +183,12 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean DocumentoExiste(Usuarios user) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "select * from empleado "
                 + "where CodEmpleado=?";
         try {
             ps = connection.prepareStatement(sql);
             ps.setLong(1, user.getCodEmpleado());
-
             rs = ps.executeQuery();
             if (rs.next()) {
                 return true;
@@ -199,7 +202,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean crearCategoria(Productos producto) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "Insert into categoria_productos(CodCategoria,Descripcion) "
                 + "values (?,?)";
         try {
@@ -215,7 +218,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean ModificarCategoria(Productos producto) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "UPDATE categoria_productos SET CodCategoria=?, Descripcion=? where CodCategoria = ? or Descripcion=?";
         try {
             ps = connection.prepareStatement(sql);
@@ -233,7 +236,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean ExisteCodCategoria(Productos producto) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "select * from categoria_productos "
                 + "where CodCategoria=?";
         try {
@@ -254,7 +257,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public void EliminarCategoria(Productos producto) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "delete from categoria_productos "
                 + "where CodCategoria=? and Descripcion=?";
         try {
@@ -268,7 +271,7 @@ public class SentenciasSQL extends Conexion {
     }
 
     public boolean ExisteDescripcionCategoria(Productos producto) {
-        connection = getConection();
+        connection = connect.getConnection();
         sql = "select * from categoria_productos "
                 + "where Descripcion=?";
         try {
@@ -282,6 +285,26 @@ public class SentenciasSQL extends Conexion {
             }
         } catch (SQLException ex) {
             Logger.getLogger(SentenciasSQL.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+
+    public boolean ExisteCodProducto(Productos producto) {
+        connection = connect.getConnection();
+        sql = "select * from producto"
+                + " where CodProducto=?";
+        try {
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, producto.getCodProducto());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException ex) {
+            //Logger.getLogger(SentenciasSQL.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Excepcion: " + ex);
             return false;
         }
     }

@@ -1,9 +1,10 @@
-package Visual;
+package Visual.Ok;
 
-import Logica.Conexion;
-import Logica.Encrypt;
+import Logica.Verified.SQLLogin;
+import Logica.Verified.Conexion;
+import Logica.Verified.Encrypt;
 import Logica.SentenciasSQL;
-import Logica.Usuarios;
+import Logica.Verified.Usuarios;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,15 +14,19 @@ import javax.swing.JOptionPane;
 public class Login extends javax.swing.JFrame {
 
     Conexion connect = new Conexion();
-    Connection con;
+    Connection connection;
     PreparedStatement ps = null;
     ResultSet rs = null;
     String sql = null;
 
+    Usuarios Users = new Usuarios();
+    SQLLogin SQLLogin = new SQLLogin();
+
     public Login() {
+        SQLLogin.setConnection(connect.getConnection());
         initComponents();
         this.setLocationRelativeTo(null);
-        
+
     }
 
     @SuppressWarnings("unchecked")
@@ -38,7 +43,7 @@ public class Login extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(102, 204, 255));
 
-        jPanel1.setBackground(new java.awt.Color(0, 153, 204));
+        jPanel1.setBackground(new java.awt.Color(51, 153, 255));
 
         lbl_usuario.setFont(new java.awt.Font("Snap ITC", 1, 14)); // NOI18N
         lbl_usuario.setText("USUARIO");
@@ -103,17 +108,16 @@ public class Login extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-        Usuarios Users = new Usuarios();
-        SentenciasSQL SqlModel = new SentenciasSQL();
+        connection = connect.getConnection();
+
         String passwd = new String(txtPasswd.getPassword());
 
         if (!txt_user.getText().equals("") && !passwd.equals("")) {
 
-            con = connect.getConection();
             String newPasswd = Encrypt.sha1(passwd);
             Users.setUsuario(txt_user.getText());
             Users.setContraseña(newPasswd);
-            if (SqlModel.login(Users)) {
+            if (SQLLogin.login(Users)) {
                 JOptionPane.showMessageDialog(null, "Ingreso OK");
             }
         } else {

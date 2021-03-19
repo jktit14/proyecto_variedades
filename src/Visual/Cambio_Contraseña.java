@@ -5,25 +5,28 @@
  */
 package Visual;
 
-import Logica.Conexion;
-import Logica.Encrypt;
-import Logica.SentenciasSQL;
-import Logica.Usuarios;
+import Logica.Verified.Conexion;
+import Logica.Verified.Encrypt;
+import Logica.Verified.SQLUsuarios;
+import Logica.Verified.Usuarios;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 public class Cambio_Contraseña extends javax.swing.JFrame {
 
     Conexion connect = new Conexion();
-    Connection con;
+    Connection connection;
     PreparedStatement ps = null;
     ResultSet rs = null;
     String sql = null;
 
     public Cambio_Contraseña() {
         initComponents();
+        this.setLocationRelativeTo(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -104,25 +107,41 @@ public class Cambio_Contraseña extends javax.swing.JFrame {
 
     private void btnChangePasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChangePasswordActionPerformed
 
-        Usuarios model = new Usuarios();
-        SentenciasSQL SqlModel = new SentenciasSQL();
+        Usuarios users = new Usuarios();
+        SQLUsuarios SqlUsuarios = new SQLUsuarios();
         String passwd1 = new String(txtPasswd1.getPassword());
         String passwd2 = new String(txtPasswd2.getPassword());
 
+        Icon OkIcon = new ImageIcon(getClass().getResource("../Images/like1.png"));
+        Icon BadIcon = new ImageIcon(getClass().getResource("../Images/unlike1.png"));
+        Icon handIcon = new ImageIcon(getClass().getResource("../Images/hand1.png"));
+        Icon cancelIcon = new ImageIcon(getClass().getResource("../Images/cancel.png"));
+        Icon questionIcon = new ImageIcon(getClass().getResource("../Images/pregunta.png"));
+
         if (!txtUser.getText().equals("") && !passwd1.equals("") && !passwd2.equals("")) {
             if (passwd1.equals(passwd2)) {
-                con = connect.getConection();
+                //connection = connect.getConection();
                 String newPasswd = Encrypt.sha1(passwd1);
-                model.setUsuario(txtUser.getText());
-                model.setContraseña(newPasswd);
-                if (SqlModel.changePasswd(model)) {
-                    JOptionPane.showMessageDialog(null, "Cambio de Contraseña Exitoso");
+                users.setUsuario(txtUser.getText());
+                users.setContraseña(newPasswd);
+                if (SqlUsuarios.ExisteUsuario(users)) {
+
+                    if (SqlUsuarios.CambiarContraseña(users)) {
+                        JOptionPane.showMessageDialog(null, "Se cambio la contraseña exitosamente",
+                        "Cambio Exitoso", JOptionPane.ERROR_MESSAGE, BadIcon);
+                    } else {
+                        System.out.println("No se pudo cambiar");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "El Ususario No Existe");
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Contraseñas No Coinciden");
+                JOptionPane.showMessageDialog(null, "Las Contraseñas Ingresadas no Coinciden",
+                        "Datos No Coinciden", JOptionPane.ERROR_MESSAGE, BadIcon);
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Debe llenar todos los campos");
+            JOptionPane.showMessageDialog(null, "Por favor diligencie los campos correspondientes",
+                    "Datos Incompletos", JOptionPane.PLAIN_MESSAGE, handIcon);
         }
     }//GEN-LAST:event_btnChangePasswordActionPerformed
 

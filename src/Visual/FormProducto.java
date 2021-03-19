@@ -1,8 +1,9 @@
 package Visual;
 
-import Logica.Conexion;
-import Logica.Productos;
+import Logica.Verified.Conexion;
+import Logica.Verified.Productos;
 import Logica.SQLProductos;
+import Logica.SentenciasSQL;
 import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,22 +12,26 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
-public class FormProducto extends javax.swing.JFrame {
+public class FormProducto extends JFrame {
 
-    public static Conexion connect = new Conexion();
-    public static Connection connection;
-    public static PreparedStatement ps = null;
-    public static ResultSet rs = null;
-    public static ResultSetMetaData mdrs = null;
-    public static String sql = null,
+    Conexion connect = new Conexion();
+    Connection connection;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    ResultSetMetaData mdrs = null;
+    String sql = "",
             sqlTabla = "select producto.CodProducto, producto.Descripcion,categoria_productos.Descripcion "
             + "from producto, categoria_productos "
             + "where producto.CodCategoria = categoria_productos.CodCategoria";
-    public static SQLProductos sqlProducto = new SQLProductos();
-    public static Productos producto = new Productos();
+
+    public SQLProductos SQLProducto = new SQLProductos();
+    public SentenciasSQL sqlModel = new SentenciasSQL();
+    public Productos producto = new Productos();
+
     Icon OkIcon = new ImageIcon(getClass().getResource("../Images/like1.png"));
     Icon BadIcon = new ImageIcon(getClass().getResource("../Images/unlike1.png"));
     Icon handIcon = new ImageIcon(getClass().getResource("../Images/hand1.png"));
@@ -34,21 +39,24 @@ public class FormProducto extends javax.swing.JFrame {
     Icon questionIcon = new ImageIcon(getClass().getResource("../Images/pregunta.png"));
 
     public FormProducto() {
+        //SQLProducto.setConnection(connect.getConnection());
+        //connection = connect.getConnection();
         initComponents();
+        //cargarListaCategorias();
+        //cargarDatos(sqlTabla);
         this.setLocationRelativeTo(null);
-        cargarListaCategorias();
-        cargarDatos(sqlTabla);
     }
 
     public void cargarDatos(String consulta) {
-        connect.getConection();
+        connection = connect.getConnection();
+        SQLProducto.setConnection(connection);
         int columnas;
         DefaultTableModel modelo = new DefaultTableModel();
         tbProductos.setBackground(Color.white);
         tbProductos.setModel(modelo);
         try {
-            
             ps = connection.prepareStatement(consulta);
+            //System.out.println(ps);
             rs = ps.executeQuery();
             mdrs = rs.getMetaData();
             columnas = mdrs.getColumnCount();
@@ -65,25 +73,20 @@ public class FormProducto extends javax.swing.JFrame {
 
                 for (int i = 0; i < columnas; i++) {
                     filas[i] = rs.getObject(i + 1);
-
                 }
                 modelo.addRow(filas);
             }
         } catch (SQLException ex) {
             System.out.println("Error: " + ex);
         }
-        connect.stopConection();
+
     }
 
     public void cargarListaCategorias() {
+        connection = connect.getConnection();
         int columnas;
-        connection = connect.getConection();
-        //ALIMENTACION COMBO BOX
-        rs = null;
-        mdrs = null;
         try {
             ps = connection.prepareStatement("select * from categoria_productos");
-
             rs = ps.executeQuery();
             mdrs = rs.getMetaData();
             columnas = mdrs.getColumnCount();
@@ -94,7 +97,6 @@ public class FormProducto extends javax.swing.JFrame {
         } catch (SQLException ex) {
             System.out.println("Error: " + ex);
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -176,6 +178,13 @@ public class FormProducto extends javax.swing.JFrame {
             }
         });
 
+        txtBuscar.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+                txtBuscarInputMethodTextChanged(evt);
+            }
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+            }
+        });
         txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtBuscarKeyPressed(evt);
@@ -291,9 +300,9 @@ public class FormProducto extends javax.swing.JFrame {
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(lblCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtCodigo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblDescripcion, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -326,37 +335,50 @@ public class FormProducto extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void tbProductosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbProductosMouseClicked
+        SQLProducto.setConnection(connect.getConnection());
+        int fila = tbProductos.getSelectedRow();
+        producto.setCodProducto(tbProductos.getValueAt(fila, 0).toString());
+        producto.setDescripcion(tbProductos.getValueAt(fila, 1).toString());
+        producto.setDescripcionCategoria(tbProductos.getValueAt(fila, 2).toString());
+        producto.setCodCategoria(SQLProducto.ObtenerCodCategoria(tbProductos.getValueAt(fila, 2).toString()));
+
+        txtCodigo.setText(producto.getCodProducto());
+        txtDescripcion.setText(producto.getDescripcion());
+        cbCategoria.setSelectedItem(producto.getDescripcionCategoria());
+        //.setText(producto.getDescripcionCategoria());
+
+        SQLProducto.setCodProducto(tbProductos.getValueAt(fila, 0).toString());
+        SQLProducto.setDescProducto(tbProductos.getValueAt(fila, 1).toString());
+        SQLProducto.setCodCategoria(SQLProducto.ObtenerCodCategoria(tbProductos.getValueAt(fila, 2).toString()));
+        SQLProducto.setCodCategoria(SQLProducto.ObtenerCodCategoria(tbProductos.getValueAt(fila, 2).toString()));
 
     }//GEN-LAST:event_tbProductosMouseClicked
 
     private void btnInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertarActionPerformed
-        producto.setCodProducto(txtCodigo.getText());
-        producto.setDescripcion(txtDescripcion.getText());
-        producto.setDescripcionCategoria(cbCategoria.getSelectedItem().toString());
-        producto.setCodCategoria(sqlProducto.ObtenerCodCategoria(producto));
 
-        //String Codigo = tbCategorias.getValueAt(fila, 0).toString();
-        //String Descripcion = tbCategorias.getValueAt(fila, 1).toString();
         if (txtCodigo.getText().equals("") || txtDescripcion.getText().equals("") || cbCategoria.getSelectedItem().equals("Seleccione")) {
             JOptionPane.showMessageDialog(null, "Por favor diligencie los campos correspondientes",
                     "Datos Incompletos", JOptionPane.PLAIN_MESSAGE, handIcon);
-
         } else {
-            if (sqlProducto.ExisteCodProducto(producto)) {
-                //JOptionPane.showMessageDialog(null, "El Codigo ingresado ya existe\nSi lo va a actualizar presione modificar");
+            producto.setCodProducto(txtCodigo.getText());
+            producto.setDescripcion(txtDescripcion.getText());
+            //producto.setDescripcionCategoria(cbCategoria.getSelectedItem().toString());
+            producto.setCodCategoria(SQLProducto.ObtenerCodCategoria(cbCategoria.getSelectedItem().toString()));
+            if (SQLProducto.ExisteCodProducto(producto)) {
                 JOptionPane.showMessageDialog(null, "El Codigo ingresado ya existe\n"
                         + "Si lo va a actualizar presione modificar", "Dato ya existe",
                         JOptionPane.PLAIN_MESSAGE, BadIcon);
 
             } else {
-                JOptionPane.showMessageDialog(null, "Se Creo la Categoria Exitosamente", "Ingreso Exitoso", JOptionPane.PLAIN_MESSAGE, OkIcon);
-                if (sqlProducto.crearProducto(producto)) { //System.out.println("Ingreso Exitoso");
-                    cargarDatos(sqlTabla);
+                if (SQLProducto.crearProducto(producto)) { //System.out.println("Ingreso Exitoso");
+                    JOptionPane.showMessageDialog(null, "Se Creo la Categoria Exitosamente",
+                            "Ingreso Exitoso", JOptionPane.PLAIN_MESSAGE, OkIcon);
                 } else {
                     System.out.println("ERROR");
 
                 }
             }
+            cargarDatos(sqlTabla);
         }
     }//GEN-LAST:event_btnInsertarActionPerformed
 
@@ -365,9 +387,7 @@ public class FormProducto extends javax.swing.JFrame {
     }//GEN-LAST:event_txtBuscarKeyPressed
 
     private void txtBuscarKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarKeyReleased
-
         String texto = txtBuscar.getText();
-
         cargarDatos(sqlTabla + " and (producto.CodProducto like '%" + texto
                 + "%' or producto.Descripcion like '%" + texto
                 + "%' or categoria_productos.Descripcion like '%" + texto + "%')");
@@ -391,15 +411,89 @@ public class FormProducto extends javax.swing.JFrame {
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
 
+        if (txtCodigo.getText().equals("") || txtDescripcion.getText().equals("") || cbCategoria.getSelectedItem().equals("Seleccione")) {
+            JOptionPane.showMessageDialog(null, "Por favor diligencie los campos correspondientes",
+                    "Datos Incompletos", JOptionPane.PLAIN_MESSAGE, handIcon);
+
+        } else {
+            producto.setCodProducto(SQLProducto.getCodProducto());
+            producto.setDescripcion(SQLProducto.getDescProducto());
+            producto.setCodCategoria(SQLProducto.getCodCategoria());
+            if (SQLProducto.ExisteProducto(producto)) {
+
+                producto.setCodProducto(txtCodigo.getText());
+                producto.setDescripcion(txtDescripcion.getText());
+                producto.setCodCategoria(SQLProducto.ObtenerCodCategoria(cbCategoria.getSelectedItem().toString()));
+
+                if (producto.getCodProducto().equals(SQLProducto.getCodProducto())
+                        && producto.getDescripcion().equals(SQLProducto.getDescProducto())
+                        && producto.getCodCategoria().equals(SQLProducto.getCodCategoria())) {
+                    JOptionPane.showMessageDialog(null, "<html><center>No Se Actualizaron Los Datos,<br>"
+                            + "Los Datos Ingresados Son Iguales A Los Almacenados</center><html>", "Actualización Erronea", JOptionPane.PLAIN_MESSAGE, BadIcon);
+                } else {
+
+                    if (producto.getCodProducto().equals(SQLProducto.getCodProducto())) {
+                        if (SQLProducto.ModificarProducto(producto)) {
+                            JOptionPane.showMessageDialog(null, "Se modificaron los datos correctamente",
+                                    "Actualización Exitosa", JOptionPane.PLAIN_MESSAGE, OkIcon);
+                        } else {
+                            System.out.println("ERROR");
+                        }
+                    } else {
+                        if (SQLProducto.ExisteCodProducto(producto)) {
+                            JOptionPane.showMessageDialog(null, "El Codigo Ingresado Ya Existe", "No Se Puede Modificar",
+                                    JOptionPane.PLAIN_MESSAGE, BadIcon);
+                        } else {
+                            if (SQLProducto.ModificarProducto(producto)) {
+                                JOptionPane.showMessageDialog(null, "Se modificaron los datos correctamente",
+                                        "Actualización Exitosa", JOptionPane.PLAIN_MESSAGE, OkIcon);
+                            } else {
+                                System.out.println("ERROR");
+                            }
+                        }
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "<html><center>No Se Encontraron Datos Para Ser Actualizados,<br>"
+                        + "Seleccione El Valor De La Tabla e Intente De Nuevo</center><html>",
+                        "Error de Actualizacion", JOptionPane.PLAIN_MESSAGE, BadIcon);
+            }
+        }
+        txtBuscar.setText("");
+        cargarDatos(sqlTabla);
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-
+        //connection=connect.getConnection();
+        //producto.setCodProducto(txtCodigo.getText().toString());
+        sql = "select * from producto "
+                + "where CodProducto=?";
+        try {
+            //System.out.println(sql);
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, producto.getCodProducto());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                //System.out.println("OK");
+                //return true;
+            } else {
+                System.out.println("Error");
+                //return false;
+            }
+        } catch (SQLException ex) {
+            //Logger.getLogger(SentenciasSQL.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Excepcion: " + ex);
+            //return false;
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void cbCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbCategoriaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cbCategoriaActionPerformed
+
+    private void txtBuscarInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_txtBuscarInputMethodTextChanged
+
+    }//GEN-LAST:event_txtBuscarInputMethodTextChanged
 
     /**
      * @param args the command line arguments

@@ -1,4 +1,4 @@
-package Logica;
+package Logica.Verified;
 
 //Esta clase es la que permitira la conexion con la Base de Datos
 import java.sql.Connection;
@@ -19,7 +19,11 @@ public class Conexion {
     private static final String Url = "jdbc:mysql://remotemysql.com/h5UWGvy0uD";
 
     public Conexion() {
-        connect = null;
+        getConnection();
+    }
+
+    //Metodo para establecer la conexion a la base de datos
+    public Connection getConnection() {
         try {
             Class.forName(Driver);
             connect = DriverManager.getConnection(Url, User, Password);
@@ -27,12 +31,10 @@ public class Conexion {
                 //System.out.println("Conexion Exitosa...");
             }
         } catch (ClassNotFoundException | SQLException e) {
-            System.out.println("Conexion Fallida!!!\n" + e);
+            //System.out.println("Conexion Fallida!!!\n" + e);
+            this.getConnection();
+            System.out.println("Error de Prueba: " + e);
         }
-    }
-
-    //Metodo para establecer la conexion a la base de datos
-    public Connection getConection() {
         return connect;
     }
 
@@ -40,7 +42,7 @@ public class Conexion {
     public void stopConection() {
         connect = null;
         if (connect == null) {
-            //System.out.println("Se ha desconectado de la Base de Datos");
+            System.out.println("Se ha desconectado de la Base de Datos");
         }
     }
 
