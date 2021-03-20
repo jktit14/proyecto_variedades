@@ -1,6 +1,6 @@
-package Logica.Verified;
+package Logica;
 
-import Logica.SentenciasSQL;
+import PENDIENTE.SentenciasSQL;
 import java.sql.*;
 import java.sql.SQLException;
 import java.util.logging.Level;

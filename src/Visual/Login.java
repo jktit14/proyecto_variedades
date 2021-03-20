@@ -1,10 +1,10 @@
-package Visual.Ok;
+package Visual;
 
-import Logica.Verified.SQLLogin;
-import Logica.Verified.Conexion;
-import Logica.Verified.Encrypt;
-import Logica.SentenciasSQL;
-import Logica.Verified.Usuarios;
+import Logica.SQLLogin;
+import Logica.Conexion;
+import Logica.Encrypt;
+import PENDIENTE.SentenciasSQL;
+import Logica.Usuarios;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

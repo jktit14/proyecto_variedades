@@ -1,9 +1,9 @@
 package Visual;
 
-import Logica.Verified.Conexion;
-import Logica.Verified.Productos;
-import Logica.SQLProductos;
-import Logica.SentenciasSQL;
+import Logica.Conexion;
+import Logica.Productos;
+import PENDIENTE.SQLProductos;
+import PENDIENTE.SentenciasSQL;
 import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

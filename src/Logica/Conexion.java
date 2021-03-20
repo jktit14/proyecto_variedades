@@ -1,4 +1,4 @@
-package Logica.Verified;
+package Logica;
 
 //Esta clase es la que permitira la conexion con la Base de Datos
 import java.sql.Connection;

@@ -1,9 +1,9 @@
-package Logica;
+package PENDIENTE;
 
-import Logica.Verified.Usuarios;
-import Logica.Verified.Encrypt;
-import Logica.Verified.Productos;
-import Logica.Verified.Conexion;
+import Logica.Usuarios;
+import Logica.Encrypt;
+import Logica.Productos;
+import Logica.Conexion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

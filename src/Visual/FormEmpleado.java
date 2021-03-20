@@ -1,9 +1,9 @@
-package Visual.Ok;
+package Visual;
 
-import Logica.Verified.Conexion;
-import Logica.Verified.Encrypt;
-import Logica.Verified.SQLUsuarios;
-import Logica.Verified.Usuarios;
+import Logica.Conexion;
+import Logica.Encrypt;
+import Logica.SQLUsuarios;
+import Logica.Usuarios;
 import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

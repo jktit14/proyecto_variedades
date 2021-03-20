@@ -1,9 +1,8 @@
-package Visual.Ok;
+package Visual;
 
-import Logica.Verified.Productos;
-import Logica.Verified.Conexion;
-import Logica.Verified.SQLCategoria;
-import Logica.*;
+import Logica.Productos;
+import Logica.Conexion;
+import Logica.SQLCategoria;
 import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

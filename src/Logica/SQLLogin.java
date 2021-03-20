@@ -1,8 +1,8 @@
-package Logica.Verified;
+package Logica;
 
-import Logica.SentenciasSQL;
-import Logica.Verified.Conexion;
-import Logica.Verified.Usuarios;
+import PENDIENTE.SentenciasSQL;
+import Logica.Conexion;
+import Logica.Usuarios;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
